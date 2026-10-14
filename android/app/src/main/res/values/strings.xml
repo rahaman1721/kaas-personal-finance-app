@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">KaasApp</string>
+    <string name="title_activity_main">KaasApp</string>
+    <string name="package_name">com.kaasapp</string>
+    <string name="custom_url_scheme">com.kaasapp</string>
+</resources>

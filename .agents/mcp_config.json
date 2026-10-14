@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "rea": {
+      "command": "npx",
+      "args": ["-y", "rea-agents"],
+      "description": "Reverse engineering & binary/bundle/web inspection agent toolkit"
+    }
+  }
+}
