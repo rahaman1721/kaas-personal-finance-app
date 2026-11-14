@@ -1,23 +1,36 @@
 import { useMemo, useState } from 'react';
 import { formatCompact, formatCurrency, type Transaction } from '../db';
 import { dayKey, dayLabel, daysBetween, isSameMonth, sameDay, startOfDay } from '../lib/dates';
-import { Empty, Segmented } from '../components/ui';
+import { Empty, Icon, Segmented } from '../components/ui';
 import { TxRow } from '../components/TxRow';
 
 type Period = 'today' | 'week' | 'month' | 'all';
 type Kind = 'all' | 'expense' | 'income';
 
-export function ActivityScreen({ transactions, onOpenTx, onAdd }: {
+export function ActivityScreen({
+  transactions, onOpenTx, onAdd, onToggleTheme, isDark,
+}: {
   transactions: Transaction[];
   onOpenTx: (tx: Transaction) => void;
   onAdd: () => void;
+  onToggleTheme?: () => void;
+  isDark?: boolean;
 }) {
   const [period, setPeriod] = useState<Period>('month');
   const [kind, setKind] = useState<Kind>('all');
   const [query, setQuery] = useState('');
+  const [selectedCat, setSelectedCat] = useState<string | null>(null);
 
   const now = new Date();
   const today = dayKey(now);
+
+  const categories = useMemo(() => {
+    const names = new Set<string>();
+    transactions.forEach(t => {
+      if (t.categoryName) names.add(t.categoryName);
+    });
+    return Array.from(names).sort();
+  }, [transactions]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -29,11 +42,11 @@ export function ActivityScreen({ transactions, onOpenTx, onAdd }: {
         period === 'week' ? daysBetween(d, now) >= 0 && daysBetween(d, now) <= 6 :
         isSameMonth(d, now);
       const inKind = kind === 'all' || t.type === kind;
-      const matches = !q || t.merchant.toLowerCase().includes(q) || t.categoryName.toLowerCase().includes(q);
-      return inPeriod && inKind && matches;
+      const inCat = !selectedCat || t.categoryName === selectedCat;
+      const matches = !q || t.merchant.toLowerCase().includes(q) || t.categoryName.toLowerCase().includes(q) || (t.notes && t.notes.toLowerCase().includes(q));
+      return inPeriod && inKind && inCat && matches;
     });
-    // `now` changes every render, but only the calendar day matters for filtering
-  }, [transactions, period, kind, query, today]);
+  }, [transactions, period, kind, selectedCat, query, today]);
 
   const income = filtered.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
   const spent = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
@@ -66,6 +79,18 @@ export function ActivityScreen({ transactions, onOpenTx, onAdd }: {
     <div className="screen">
       <header className="page-head">
         <h1 className="page-title">Activity</h1>
+        {onToggleTheme && (
+          <button
+            type="button"
+            className="icon-btn"
+            onClick={onToggleTheme}
+            aria-label="Toggle light or dark theme"
+            title="Toggle Theme"
+            style={{ border: '1px solid var(--line)' }}
+          >
+            <Icon name={isDark ? 'light_mode' : 'dark_mode'} small />
+          </button>
+        )}
       </header>
 
       <Segmented<Period>
@@ -75,16 +100,32 @@ export function ActivityScreen({ transactions, onOpenTx, onAdd }: {
         options={[{ id: 'today', label: 'Today' }, { id: 'week', label: '7 days' }, { id: 'month', label: 'This month' }, { id: 'all', label: 'All' }]}
       />
 
-      <div className="field" style={{ marginTop: 12, marginBottom: 12 }}>
+      <div className="field" style={{ marginTop: 12, marginBottom: 8, position: 'relative' }}>
         <input
           className="input"
           type="search"
-          placeholder="Search notes or categories"
+          placeholder="Search merchant, notes or category..."
           aria-label="Search transactions"
           value={query}
           onChange={e => setQuery(e.target.value)}
+          style={{ paddingRight: query ? 44 : 14 }}
         />
+        {query && (
+          <button
+            type="button"
+            onClick={() => setQuery('')}
+            aria-label="Clear search"
+            style={{
+              position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
+              width: 30, height: 30, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: 'var(--sunken)', color: 'var(--ink-2)'
+            }}
+          >
+            <Icon name="close" small />
+          </button>
+        )}
       </div>
+
       <Segmented<Kind>
         label="Type"
         value={kind}
@@ -92,7 +133,29 @@ export function ActivityScreen({ transactions, onOpenTx, onAdd }: {
         options={[{ id: 'all', label: 'All' }, { id: 'expense', label: 'Expenses' }, { id: 'income', label: 'Income' }]}
       />
 
-      <div className="stats" style={{ marginTop: 16 }}>
+      {categories.length > 0 && (
+        <div className="chips" style={{ marginTop: 10, marginBottom: 4 }}>
+          <button
+            type="button"
+            className={`chip ${!selectedCat ? 'on' : ''}`}
+            onClick={() => setSelectedCat(null)}
+          >
+            All Categories
+          </button>
+          {categories.map(c => (
+            <button
+              key={c}
+              type="button"
+              className={`chip ${selectedCat === c ? 'on' : ''}`}
+              onClick={() => setSelectedCat(selectedCat === c ? null : c)}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="stats" style={{ marginTop: 14 }}>
         <div><small>Income</small><span className="num in">{formatCurrency(income)}</span></div>
         <div><small>Spent</small><span className="num">{formatCurrency(spent)}</span></div>
         <div><small>Net</small><span className={`num ${net < 0 ? 'out' : ''}`}>{formatCurrency(net)}</span></div>
@@ -116,7 +179,7 @@ export function ActivityScreen({ transactions, onOpenTx, onAdd }: {
         transactions.length === 0 ? (
           <Empty title="No activity yet" desc="Everything you log will appear here, grouped by day." action={<button type="button" className="btn primary" onClick={onAdd}>Add a transaction</button>} />
         ) : (
-          <Empty title="No matches" desc="Try another period or clear the search." />
+          <Empty title="No matches" desc="Try another period or clear the search filters." />
         )
       ) : (
         groups.map(([key, txs]) => {

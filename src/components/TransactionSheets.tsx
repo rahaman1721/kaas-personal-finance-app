@@ -170,6 +170,24 @@ export function AddSheet({ prefill, onClose, onSave, onToast }: {
         {error && <p id="add-error" className="hint bad" role="alert">{error}</p>}
       </div>
 
+      <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap', marginTop: -12, marginBottom: 16 }}>
+        {[50, 100, 200, 500, 1000].map(addVal => (
+          <button
+            key={addVal}
+            type="button"
+            className="chip"
+            style={{ minHeight: 32, padding: '0 10px', fontSize: 13 }}
+            onClick={() => {
+              const cur = parseFloat(amount) || 0;
+              setAmount(String(cur + addVal));
+              setError('');
+            }}
+          >
+            +{addVal}
+          </button>
+        ))}
+      </div>
+
       <div className="field">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span className="label" style={{ margin: 0 }}>Category</span>
@@ -306,6 +324,7 @@ export function DetailSheet({ tx, onClose, onEdit, onDelete }: {
   onEdit: (tx: Transaction) => void;
   onDelete: (tx: Transaction) => void;
 }) {
+  const [viewingPhoto, setViewingPhoto] = useState(false);
   const when = new Date(tx.date);
   const rows: [string, string][] = [
     ['Category', tx.categoryName],
@@ -315,39 +334,89 @@ export function DetailSheet({ tx, onClose, onEdit, onDelete }: {
   if (tx.notes) rows.push(['Notes', tx.notes]);
 
   return (
-    <Sheet
-      title="Transaction"
-      onClose={onClose}
-      footer={
-        <>
-          <button type="button" className="btn danger" onClick={() => onDelete(tx)}><Icon name="delete" small /> Delete</button>
-          <button type="button" className="btn primary" onClick={() => onEdit(tx)}><Icon name="edit" small /> Edit</button>
-        </>
-      }
-    >
-      <div style={{ textAlign: 'center', padding: '8px 0 20px' }}>
-        <div className="num" style={{ fontSize: 34, fontWeight: 500, color: tx.type === 'income' ? 'var(--brand-text)' : 'var(--ink)' }}>
-          {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
-        </div>
-        <div style={{ fontWeight: 500, marginTop: 4 }}>
-          {tx.merchant}
-          {tx.isUnnecessary && <span className="tag">Impulse</span>}
-        </div>
-      </div>
-      <div className="list">
-        {rows.map(([k, v]) => (
-          <div className="row" key={k} style={{ minHeight: 48 }}>
-            <span className="row-sub" style={{ flex: '0 0 96px' }}>{k}</span>
-            <span className="row-main" style={{ textAlign: 'right', whiteSpace: 'normal' }}>{v}</span>
+    <>
+      <Sheet
+        title="Transaction"
+        onClose={onClose}
+        footer={
+          <>
+            <button type="button" className="btn danger" onClick={() => onDelete(tx)}><Icon name="delete" small /> Delete</button>
+            <button type="button" className="btn primary" onClick={() => onEdit(tx)}><Icon name="edit" small /> Edit</button>
+          </>
+        }
+      >
+        <div style={{ textAlign: 'center', padding: '8px 0 20px' }}>
+          <div className="num" style={{ fontSize: 34, fontWeight: 500, color: tx.type === 'income' ? 'var(--brand-text)' : 'var(--ink)' }}>
+            {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
           </div>
-        ))}
-      </div>
-      {tx.receiptPhoto && (
-        <div style={{ marginTop: 16 }}>
-          <span className="label">Receipt</span>
-          <img src={tx.receiptPhoto} alt="Receipt" style={{ width: '100%', maxHeight: 320, objectFit: 'contain', borderRadius: 'var(--r-md)', background: 'var(--sunken)' }} />
+          <div style={{ fontWeight: 500, marginTop: 4 }}>
+            {tx.merchant}
+            {tx.isUnnecessary && <span className="tag">Impulse</span>}
+          </div>
+        </div>
+        <div className="list">
+          {rows.map(([k, v]) => (
+            <div className="row" key={k} style={{ minHeight: 48 }}>
+              <span className="row-sub" style={{ flex: '0 0 96px' }}>{k}</span>
+              <span className="row-main" style={{ textAlign: 'right', whiteSpace: 'normal' }}>{v}</span>
+            </div>
+          ))}
+        </div>
+        {tx.receiptPhoto && (
+          <div style={{ marginTop: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+              <span className="label" style={{ margin: 0 }}>Receipt photo</span>
+              <button
+                type="button"
+                className="link-btn"
+                style={{ padding: '4px 0', minHeight: 'auto', fontSize: 13 }}
+                onClick={() => setViewingPhoto(true)}
+              >
+                Tap to expand
+              </button>
+            </div>
+            <img
+              src={tx.receiptPhoto}
+              alt="Receipt"
+              onClick={() => setViewingPhoto(true)}
+              style={{
+                width: '100%', maxHeight: 260, objectFit: 'contain',
+                borderRadius: 'var(--r-md)', background: 'var(--sunken)',
+                cursor: 'pointer', border: '1px solid var(--line)'
+              }}
+            />
+          </div>
+        )}
+      </Sheet>
+
+      {viewingPhoto && tx.receiptPhoto && (
+        <div
+          className="scrim center"
+          onClick={() => setViewingPhoto(false)}
+          style={{ zIndex: 120, padding: 16, background: 'rgba(0, 0, 0, 0.85)' }}
+        >
+          <div style={{ position: 'relative', maxWidth: '100%', maxHeight: '90%' }}>
+            <img
+              src={tx.receiptPhoto}
+              alt="Receipt fullscreen"
+              style={{ maxWidth: '100%', maxHeight: '82vh', objectFit: 'contain', borderRadius: 'var(--r-md)' }}
+            />
+            <button
+              type="button"
+              onClick={() => setViewingPhoto(false)}
+              className="icon-btn"
+              style={{
+                position: 'absolute', top: -14, right: -14,
+                background: 'var(--surface)', color: 'var(--ink)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.3)', width: 36, height: 36
+              }}
+              aria-label="Close photo"
+            >
+              <Icon name="close" small />
+            </button>
+          </div>
         </div>
       )}
-    </Sheet>
+    </>
   );
 }

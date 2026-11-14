@@ -405,6 +405,7 @@ export default function App() {
               settings={settings}
               quick={quick}
               bills={bills}
+              goals={goals}
               onAdd={prefill => setSheet({ kind: 'add', prefill })}
               onScan={chooseScanSource}
               onQuickLog={handleQuickLog}
@@ -413,13 +414,28 @@ export default function App() {
               onNav={setTab}
               onManageQuick={() => setSheet({ kind: 'quick' })}
               onManageBills={() => setSheet({ kind: 'bills' })}
+              onManageGoals={() => setSheet({ kind: 'goals' })}
+              onToggleTheme={() => void updateSettings({ theme: settings.theme === 'dark' ? 'light' : 'dark' })}
             />
           )}
           {tab === 'activity' && (
-            <ActivityScreen transactions={transactions} onOpenTx={tx => setSheet({ kind: 'detail', tx })} onAdd={() => setSheet({ kind: 'add' })} />
+            <ActivityScreen
+              transactions={transactions}
+              onOpenTx={tx => setSheet({ kind: 'detail', tx })}
+              onAdd={() => setSheet({ kind: 'add' })}
+              onToggleTheme={() => void updateSettings({ theme: settings.theme === 'dark' ? 'light' : 'dark' })}
+              isDark={settings.theme === 'dark' || (settings.theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches)}
+            />
           )}
           {tab === 'insights' && (
-            <InsightsScreen transactions={transactions} settings={settings} goals={goals} onManageGoals={() => setSheet({ kind: 'goals' })} />
+            <InsightsScreen
+              transactions={transactions}
+              settings={settings}
+              goals={goals}
+              onManageGoals={() => setSheet({ kind: 'goals' })}
+              onToggleTheme={() => void updateSettings({ theme: settings.theme === 'dark' ? 'light' : 'dark' })}
+              isDark={settings.theme === 'dark' || (settings.theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches)}
+            />
           )}
           {tab === 'settings' && (
             <SettingsScreen

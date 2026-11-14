@@ -143,6 +143,18 @@ export const DEFAULT_SETTINGS: AppSettings = {
   remindersEnabled: false,
 };
 
+export const DEFAULT_QUICK: QuickExpense[] = [
+  { id: 'q_coffee', name: 'Coffee / Tea', amount: 40, categoryId: 'food', emoji: 'local_cafe' },
+  { id: 'q_lunch', name: 'Lunch', amount: 160, categoryId: 'food', emoji: 'restaurant' },
+  { id: 'q_metro', name: 'Metro / Fuel', amount: 100, categoryId: 'travel', emoji: 'commute' },
+  { id: 'q_grocery', name: 'Groceries', amount: 450, categoryId: 'shopping', emoji: 'shopping_cart' },
+];
+
+export const DEFAULT_GOALS: Goal[] = [
+  { id: 'g_emergency', name: 'Emergency Fund', targetAmount: 100000, savedAmount: 25000, icon: 'shield', color: '#0B5D45' },
+  { id: 'g_gadget', name: 'Work / Tech Setup', targetAmount: 60000, savedAmount: 18000, icon: 'laptop', color: '#0B5D45' },
+];
+
 // ── Normalisers: keep malformed or legacy records from breaking screens ──
 const num = (v: unknown, fallback = 0): number => {
   const n = typeof v === 'number' ? v : parseFloat(String(v));
@@ -315,9 +327,9 @@ export const deleteCustomCategory = (id: string): boolean => {
 export const initDB = (): void => {
   if (localStorage.getItem(K.TX) === null) write(K.TX, []);
   if (localStorage.getItem(K.SETTINGS) === null) write(K.SETTINGS, DEFAULT_SETTINGS);
-  if (localStorage.getItem(K.QUICK) === null) write(K.QUICK, []);
+  if (localStorage.getItem(K.QUICK) === null) write(K.QUICK, DEFAULT_QUICK);
   if (localStorage.getItem(K.BILLS) === null) write(K.BILLS, []);
-  if (localStorage.getItem(K.GOALS) === null) write(K.GOALS, []);
+  if (localStorage.getItem(K.GOALS) === null) write(K.GOALS, DEFAULT_GOALS);
 };
 
 export const clearAllData = (): void => {
