@@ -1,13 +1,15 @@
 {
   "name": "kaasapp",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "cap:sync": "npm run build && npx cap sync android"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^7.0.1",
@@ -22,11 +24,16 @@
   },
   "dependencies": {
     "@capacitor/android": "^8.5.2",
+    "@capacitor/app": "^8.0.0",
     "@capacitor/assets": "^3.0.5",
     "@capacitor/camera": "^8.2.4",
     "@capacitor/cli": "^8.5.2",
     "@capacitor/core": "^8.5.2",
+    "@capacitor/filesystem": "^8.0.0",
     "@capacitor/local-notifications": "^8.3.1",
+    "@capacitor/share": "^8.0.0",
+    "@fontsource/ibm-plex-mono": "^5.2.0",
+    "@fontsource/ibm-plex-sans": "^5.2.0",
     "material-symbols": "^0.47.5",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
