@@ -25,6 +25,57 @@
 
 ---
 
+## 🏗️ System Architecture & Data Flow
+
+KAAS is engineered around a **100% offline-first, client-side execution model**. No telemetry, credentials, or transactional amounts leave the device.
+
+```mermaid
+flowchart TD
+    subgraph ClientView ["📱 User Interface & Input Layer"]
+        UI["React 19 Responsive UI (WCAG AA)"]
+        QuickEntry["Quick Expense Logger (<3s Tap Targets)"]
+        CamModule["Capacitor Camera Native Plugin"]
+    end
+
+    subgraph ProcessingPipeline ["⚙️ On-Device Processing Engine"]
+        OCR["Tesseract.js Neural OCR Web Worker"]
+        ReceiptParser["Heuristic Amount & Date Parser"]
+        HookManager["React Custom State Engine (useTransactions)"]
+        SVGCharts["Pure SVG Spending Analytics Engine"]
+    end
+
+    subgraph NativeStorageSandbox ["🔒 Private Local Storage Sandbox"]
+        LocalData[("Encrypted LocalStorage Key-Value Store")]
+        BackupSnapshots["Automated JSON Schema Snapshots"]
+        CSVEngine["Formatted Accounting CSV Exporter"]
+        SharePlugin["Capacitor Native Share & Filesystem"]
+    end
+
+    UI --> QuickEntry
+    QuickEntry --> HookManager
+    CamModule -->|Direct Base64 Frame| OCR
+    OCR -->|Recognized Text Stream| ReceiptParser
+    ReceiptParser -->|Auto-Filled Amount & Category| QuickEntry
+    HookManager <-->|Atomic Read/Write Operations| LocalData
+    LocalData --> SVGCharts --> UI
+    LocalData --> BackupSnapshots
+    LocalData --> CSVEngine --> SharePlugin
+```
+
+### 🔬 Architecture & Data Flow Breakdown
+
+1. **Camera Ingestion & OCR Telemetry**:
+   - The user triggers camera capture via Capacitor's native bridge (`@capacitor/camera`).
+   - The raw image buffer is handed off to an isolated **Web Worker** running Tesseract.js to prevent UI thread stutter.
+   - Text parsing heuristics extract the currency symbol, numeric totals, date, and vendor details into the logger modal.
+2. **Deterministic State Synchronization**:
+   - `useTransactions` and `useBudgets` hooks manage client memory and trigger atomic writes to browser storage.
+   - Zero network latency guarantees instant interaction states across low-end mobile hardware.
+3. **Sovereign Data Export**:
+   - The export pipeline serializes transaction records into structured JSON and standard accounting CSV formats, dispatched directly to Android's native share intent via `@capacitor/share`.
+
+---
+
 ## 🛠️ Technology Stack
 
 | Layer | Technologies |
