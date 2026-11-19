@@ -27,6 +27,19 @@ Architected & Engineered by **[Obaidhur Rahaman](https://rahaman1721.framer.webs
 | **Android APK** | [⬇️ Download Production Release v1.0.0](https://github.com/rahaman1721/kaas-personal-finance-app/releases/tag/v1.0.0) | Complete 26.97 MB verified Android release package compiled with Capacitor 8 and bundled Tesseract neural weights. |
 | **Inspect Source** | [🔍 Explore Production Source Code](https://github.com/rahaman1721/kaas-personal-finance-app/tree/main/src) | 100% open production codebase (React 19, TypeScript, Vitest test suites, Android native manifests). |
 
+<div align="center">
+  <br/>
+  <h3>📱 Production Mobile UI Walkthrough</h3>
+  <p><sub>Offline-First Personal Finance Tracker — Built with React 19 & Capacitor (Android & iOS)</sub></p>
+  <br/>
+  <p align="center">
+    <img src="docs/screenshots/01-kaas-home.png" alt="KAAS Home and Balance" width="240" style="border-radius: 16px; margin: 4px;" />
+    <img src="docs/screenshots/02-kaas-insights.png" alt="KAAS Financial Insights and Analytics" width="240" style="border-radius: 16px; margin: 4px;" />
+    <img src="docs/screenshots/03-kaas-transactions.png" alt="KAAS Transaction Ledger" width="240" style="border-radius: 16px; margin: 4px;" />
+  </p>
+  <br/>
+</div>
+
 ---
 
 ## 1. Project Title, Badges & Vision
